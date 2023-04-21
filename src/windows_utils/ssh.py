@@ -61,4 +61,7 @@ def export_pub_key_in_termux_sshd():
     pubk = get_pub_key()
     pubk = pubk.replace('\n', '').replace('\r', '')
     run_command_in_termux("mkdir -p /data/data/com.termux/files/home/.ssh/")
-    run_command_in_termux(f'echo {pubk} \\>\\> /data/data/com.termux/files/home/.ssh/authorized_keys')
+    command = f"""
+    result=$(grep -e "{pubk}" /data/data/com.termux/files/home/.ssh/authorized_keys); if [ -z "$result" ]; then echo {pubk} \\>\\> /data/data/com.termux/files/home/.ssh/authorized_keys; else echo "key already added"; fi
+	""".strip().replace("\n", "")
+    run_command_in_termux(command)
