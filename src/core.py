@@ -3,9 +3,13 @@ import os
 import os.path
 import socket
 import subprocess
-import sys
+import platform
 import time
 import re
+import sys
+from src.common.utils import is_installed
+from src.logg import print_exception
+from src.adb_utils import adb_windows
 
 AGS_PATH = "/data/data/com.termux/files/home/android-git-server-utils"
 HOME = os.path.expanduser("~")
@@ -149,7 +153,8 @@ def get_clone_command():
         try:
             _choice = int(input('Choose a repository: '))
             if _choice <= len(repos_dict):
-                print(f"git clone ssh://localhost:8022/data/data/com.termux/files/home/android-git-server-utils/repos/{repos_dict[_choice]}")
+                print(
+                    f"git clone ssh://localhost:8022/data/data/com.termux/files/home/android-git-server-utils/repos/{repos_dict[_choice]}")
         except:
             pass
 
@@ -160,7 +165,8 @@ def delete_repo():
         try:
             _choice = int(input('Choose a repository: '))
             if _choice <= len(repos_dict):
-                _yn = input(f'You sure you want to delete {repos_dict[_choice]}? [type name of repo] ')
+                _yn = input(
+                    f'You sure you want to delete {repos_dict[_choice]}? [type name of repo] ')
                 if _yn == repos_dict[_choice]:
                     open_termux(1)
                     run_command_in_termux(f"rm -r {AGS_PATH}/repos/{_yn}")
@@ -168,40 +174,26 @@ def delete_repo():
             pass
 
 
-menu_options = {
-    1: 'Setup system',
-    2: 'Create new repo',
-    3: 'List all active repositories',
-    4: 'Get clone command',
-    5: 'Try to find the IP of your device',
-	6: "Delete repo",
-    7: 'Exit',
-}
+def check_everything():
+    # python version
+    if sys.version_info[0] < 3:
+        print_exception("Python 3 or a more recent version is required.")
+    # adb installed?
+    # or is ssh installed?
+    _platform = platform.system()
+    if _platform == "Windows":
+        if not is_installed("adb.exe"):
+            print_exception("Install adb first.")
+        if not is_installed("ssh.exe"):
+            print_exception("Install ssh first.")
+    elif _platform == "Linux" or _platform == "Darwin":
+        if not is_installed("adb"):
+            print_exception("Install adb first.")
+        if not is_installed("ssh"):
+            print_exception("Install ssh first.")
+    # device connected?
+    if _platform == "Windows":
+        if not adb_windows.is_device_available("adb.exe"):
+            print_exception("None device connected")
 
-
-def print_menu():
-    for item in menu_options.items():
-        print(item[0], '--', item[1])
-
-
-open_termux(2)
-start_ssh()
-while True:
-    print_menu()
-    option = int(input('Enter your choice: '))
-    if option == 1:
-        setup_system()
-    elif option == 2:
-        create_new_repository()
-    elif option == 3:
-        list_all_active_repos()
-    elif option == 4:
-        get_clone_command()
-    elif option == 5:
-        find_device_arp_info()
-    elif option == 6:
-        delete_repo()
-    elif option == 7:
-        sys.exit()
-    else:
-        print('Invalid option. Please enter a number between 1 and 3.')
+	# check ags-keys
