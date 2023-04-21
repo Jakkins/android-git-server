@@ -8,8 +8,10 @@ import time
 import re
 import sys
 from src.common.utils import is_installed
-from src.logg import print_exception
-from src.adb_utils import adb_windows
+from src.logg import logg, print_exception
+import src.windows_utils.adb as w_adb
+import src.windows_utils.ssh as w_ssh
+
 
 AGS_PATH = "/data/data/com.termux/files/home/android-git-server-utils"
 HOME = os.path.expanduser("~")
@@ -193,7 +195,8 @@ def check_everything():
             print_exception("Install ssh first.")
     # device connected?
     if _platform == "Windows":
-        if not adb_windows.is_device_available("adb.exe"):
+        if not w_adb.is_device_available("adb.exe"):
             print_exception("None device connected")
-
-	# check ags-keys
+    # check ags-keys
+    if not w_ssh.are_keys_presence("ags-keys"):
+        logg().warning("You should setup the system (Option 1).")

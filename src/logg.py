@@ -7,6 +7,7 @@ logger.setLevel(logging.INFO)
 class CustomFormatter(logging.Formatter):
 
     grey = "\x1b[38;20m"
+    blue = "\x1b[34;20m"
     yellow = "\x1b[33;20m"
     red = "\x1b[31;20m"
     bold_red = "\x1b[31;1m"
@@ -15,7 +16,7 @@ class CustomFormatter(logging.Formatter):
 
     FORMATS = {
         logging.DEBUG: grey + format_str + reset,
-        logging.INFO: grey + format_str + reset,
+        logging.INFO: blue + format_str + reset,
         logging.WARNING: yellow + format_str + reset,
         logging.ERROR: red + format_str + reset,
         logging.CRITICAL: bold_red + format_str + reset
@@ -30,6 +31,9 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 ch.setFormatter(CustomFormatter())
 logger.addHandler(ch)
+
+def logg():
+    return logger
 
 def print_exception(msg: str):
     """

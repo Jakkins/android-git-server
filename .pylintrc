@@ -7,3 +7,4 @@ disable=
 	W0105, # pointless-string-statement
 	W0702, # bare-except
 	W0719, # broad-exception-raised
+	W1203, # logging-fstring-interpolation
