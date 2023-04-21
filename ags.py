@@ -25,9 +25,6 @@ def print_menu():
 
 if __name__ == '__main__':
     check_everything()
-    time.sleep(2)
-    # open_termux(2)
-    # start_ssh() ssh should start alone using Termux:Boot app
     while True:
         print_menu()
         option = int(input('Enter your choice: '))

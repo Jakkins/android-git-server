@@ -131,26 +131,22 @@ def check_everything():
     logg().info("check python version")
     if sys.version_info[0] < 3:
         print_exception("Python 3 or a more recent version is required.")
-    logg().info("check adb, ssh, ssh-keygen installed")
+    logg().info("check adb, ssh installed")
     _platform = platform.system()
+    adb_command = "adb.exe" if _platform == "Windows" else "adb"
+    ssh_command = "ssh.exe -v" if _platform == "Windows" else "ssh -v"
+    if not is_installed(adb_command):
+        print_exception("Install adb first.")
+    if not is_installed(ssh_command):
+        print_exception("Install ssh first.")
     if _platform == "Windows":
-        if not is_installed("adb.exe"):
-            print_exception("Install adb first.")
-        if not is_installed("ssh.exe -v"):
-            print_exception("Install ssh first.")
-    elif _platform == "Linux" or _platform == "Darwin":
-        if not is_installed("adb"):
-            print_exception("Install adb first.")
-        if not is_installed("ssh -v"):
-            print_exception("Install ssh first.")
-    logg().info("check if device is connected")
-    if _platform == "Windows":
-        if not w_adb.is_device_available("adb.exe"):
+        logg().info("check if device is connected")
+        if not w_adb.is_device_available(adb_command):
             print_exception("None device connected")
-    logg().info("check ags-keys")
-    if not w_ssh.are_keys_present("ags-key"):
-        w_ssh.create_ssh_key_pair()
-    else:
-        logg().info("ags-keys already present")
-    w_ssh.create_ssh_configuration()  # auto check for configuration presence
-    # logg().warning("You should setup the system (Option 1).")
+        logg().info("check ags-keys")
+        if not w_ssh.are_keys_present("ags-key"):
+            w_ssh.create_ssh_key_pair()
+        else:
+            logg().info("ags-keys already present")
+        w_ssh.create_ssh_configuration()  # auto check for configuration presence
+        # logg().warning("You should setup the system (Option 1).")
