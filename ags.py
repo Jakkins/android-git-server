@@ -15,6 +15,10 @@ menu_options = {
 def print_menu():
     os.system('cls' if os.name == 'nt' else 'clear')
     time.sleep(1.5)
+    print("  __    ___  ____ ")
+    print(" / _\\  / __)/ ___)")
+    print("/    \\| (_  \\ ___\\")
+    print("\\_/\\_/ \\___/(____/")
     for item in menu_options.items():
         print(item[0], '--', item[1])
 
