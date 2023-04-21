@@ -135,3 +135,4 @@ def check_everything():
             logg().info("ags-keys already present")
         w_ssh.create_ssh_configuration()  # auto check for configuration presence
         # logg().warning("You should setup the system (Option 1).")
+    os.system('adb forward tcp:8022 tcp:8022')
