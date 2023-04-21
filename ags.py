@@ -3,7 +3,7 @@ import platform
 import sys
 import time
 from src.core import check_everything, create_new_repository, delete_repo, find_device_arp_info, get_clone_command, list_all_active_repos
-from src.termux_utils import setup_system
+from src.termux.termux_manager import setup_system
 
 _platform = platform.system()
 ADB_COMMAND = "adb.exe" if _platform == "Windows" else "adb"

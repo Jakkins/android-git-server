@@ -6,7 +6,7 @@ import subprocess
 import platform
 import re
 import sys
-from src.termux_utils import open_termux, run_command_in_termux
+from src.termux.termux_utils import open_termux, run_command_in_termux
 from src.common.utils import is_installed
 from src.logg import logg, print_exception
 import src.windows_utils.adb as w_adb

@@ -2,7 +2,7 @@ import os
 import re
 from src.common.utils import read_file_content
 from src.logg import logg, print_exception
-from src.termux_utils import run_command_in_termux
+from src.termux.termux_utils import run_command_in_termux
 
 HOME = os.path.expanduser("~")
 
@@ -61,7 +61,11 @@ def export_pub_key_in_termux_sshd():
     pubk = get_pub_key()
     pubk = pubk.replace('\n', '').replace('\r', '')
     run_command_in_termux("mkdir -p /data/data/com.termux/files/home/.ssh/")
+    run_command_in_termux("bash")
+    pubk_key_str = pubk.split(" ")[1]
+    run_command_in_termux(f'result=\\$\\(grep -e {pubk_key_str} /data/data/com.termux/files/home/.ssh/authorized_keys\\)\\;')
     command = f"""
-    result=$(grep -e "{pubk}" /data/data/com.termux/files/home/.ssh/authorized_keys); if [ -z "$result" ]; then echo {pubk} \\>\\> /data/data/com.termux/files/home/.ssh/authorized_keys; else echo "key already added"; fi
+    if \\[ -z '$result' \\]\\; then echo {pubk} \\>\\> /data/data/com.termux/files/home/.ssh/authorized_keys\\; else echo key already added\\; fi
 	""".strip().replace("\n", "")
     run_command_in_termux(command)
+    run_command_in_termux("cat /data/data/com.termux/files/home/.ssh/authorized_keys")
