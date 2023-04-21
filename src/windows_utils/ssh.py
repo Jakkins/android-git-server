@@ -1,5 +1,6 @@
 import os
 import re
+from src.common.utils import read_file_content
 from src.logg import logg, print_exception
 from src.termux_utils import run_command_in_termux
 
@@ -51,12 +52,13 @@ def create_ssh_configuration():
             f.writelines(
                 ["\n\nHost localhost", "\n  HostName localhost", "\n  User ags", f"\n  IdentityFile {HOME}/.ssh/ags-key"])
 
+def get_pub_key():
+    return read_file_content(f"{HOME}/.ssh/ags-key.pub", "UTF-8")
+
 
 def export_pub_key_in_termux_sshd():
-    print("Coping public key into the ssh server")
-    with open(f"{HOME}/.ssh/ags-key.pub", encoding="utf-8") as f:
-        pub_key = f.read()
-        run_command_in_termux("cd /data/data/com.termux/files/home/")
-        pub_key = pub_key.replace('\n', '').replace('\r', '')
-        run_command_in_termux(
-            f'echo {pub_key} \\>\\> .ssh/authorized_keys')
+    # check if pubk already present in authorized_keys
+    pubk = get_pub_key()
+    pubk = pubk.replace('\n', '').replace('\r', '')
+    run_command_in_termux("mkdir -p /data/data/com.termux/files/home/.ssh/")
+    run_command_in_termux(f'echo {pubk} \\>\\> /data/data/com.termux/files/home/.ssh/authorized_keys')

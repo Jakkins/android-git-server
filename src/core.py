@@ -4,27 +4,22 @@ import os.path
 import socket
 import subprocess
 import platform
-import time
 import re
 import sys
-from src.termux_utils import run_command_in_termux
+from src.termux_utils import open_termux, run_command_in_termux
 from src.common.utils import is_installed
 from src.logg import logg, print_exception
 import src.windows_utils.adb as w_adb
 import src.windows_utils.ssh as w_ssh
 
-
+_platform = platform.system()
+ADB_COMMAND = "adb.exe" if _platform == "Windows" else "adb"
 AGS_PATH = "/data/data/com.termux/files/home/android-git-server-utils"
 HOME = os.path.expanduser("~")
 
 
 def get_escaped_string(str_to_decode: str) -> str:
     return codecs.decode(str_to_decode, 'unicode_escape')
-
-
-def open_termux(sleep):
-    os.system("adb shell am start -n com.termux/.HomeActivity")
-    time.sleep(sleep)
 
 
 def start_ssh():
@@ -50,14 +45,6 @@ def create_new_repository():
     print("     git clone ssh://git@mydomain:[port]/projectname.git")
     print(
         f"     git clone ssh://localhost:8022/data/data/com.termux/files/home/android-git-server-utils/repos/{repo_name}")
-
-
-def setup_system():
-    open_termux(2)
-    print("Updating")
-    run_command_in_termux("apt update \\&\\& apt -y upgrade")
-    print("Installing git and openssh")
-    run_command_in_termux("apt install git openssh")
 
 
 def find_device_arp_info():
@@ -121,7 +108,7 @@ def delete_repo():
                 _yn = input(
                     f'You sure you want to delete {repos_dict[_choice]}? [type name of repo] ')
                 if _yn == repos_dict[_choice]:
-                    open_termux(1)
+                    open_termux(ADB_COMMAND, 1)
                     run_command_in_termux(f"rm -r {AGS_PATH}/repos/{_yn}")
         except:
             pass
@@ -132,16 +119,14 @@ def check_everything():
     if sys.version_info[0] < 3:
         print_exception("Python 3 or a more recent version is required.")
     logg().info("check adb, ssh installed")
-    _platform = platform.system()
-    adb_command = "adb.exe" if _platform == "Windows" else "adb"
     ssh_command = "ssh.exe -v" if _platform == "Windows" else "ssh -v"
-    if not is_installed(adb_command):
+    if not is_installed(ADB_COMMAND):
         print_exception("Install adb first.")
     if not is_installed(ssh_command):
         print_exception("Install ssh first.")
     if _platform == "Windows":
         logg().info("check if device is connected")
-        if not w_adb.is_device_available(adb_command):
+        if not w_adb.is_device_available(ADB_COMMAND):
             print_exception("None device connected")
         logg().info("check ags-keys")
         if not w_ssh.are_keys_present("ags-key"):
