@@ -1,5 +1,5 @@
 import sys
-from src.core import check_everything, create_new_repository, delete_repo, find_device_arp_info, get_clone_command, list_all_active_repos, open_termux, setup_system
+from src.core import *  # pylint: disable=W0401, W0614
 
 menu_options = {
     1: 'Setup system',
@@ -11,13 +11,18 @@ menu_options = {
     7: 'Exit',
 }
 
+
 def print_menu():
+    os.system('cls' if os.name == 'nt' else 'clear')
+    time.sleep(1.5)
     for item in menu_options.items():
         print(item[0], '--', item[1])
 
+
 if __name__ == '__main__':
     check_everything()
-    open_termux(2)
+    time.sleep(2)
+    # open_termux(2)
     # start_ssh() ssh should start alone using Termux:Boot app
     while True:
         print_menu()

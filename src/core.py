@@ -7,6 +7,7 @@ import platform
 import time
 import re
 import sys
+from src.termux_utils import run_command_in_termux
 from src.common.utils import is_installed
 from src.logg import logg, print_exception
 import src.windows_utils.adb as w_adb
@@ -24,18 +25,6 @@ def get_escaped_string(str_to_decode: str) -> str:
 def open_termux(sleep):
     os.system("adb shell am start -n com.termux/.HomeActivity")
     time.sleep(sleep)
-
-
-def run_command_in_termux(command):
-    """
-    lot of chars are NOT escaped be aware
-    """
-    if '\n' in command:
-        print("Illegal character new line in command")
-        return
-    command = command.replace(" ", "%s")
-    os.system(f'adb shell input text "{command}"')
-    os.system('adb shell input keyevent ENTER')
 
 
 def start_ssh():
@@ -63,50 +52,12 @@ def create_new_repository():
         f"     git clone ssh://localhost:8022/data/data/com.termux/files/home/android-git-server-utils/repos/{repo_name}")
 
 
-def create_ssh_key_pair():
-    if not os.path.exists(f"{HOME}/.ssh"):
-        print("Please install OpenSSH")
-        return
-    if (os.path.exists(f"{HOME}/.ssh/ags-key") and os.path.exists(f"{HOME}/.ssh/ags-key.pub")):
-        print("Key pair already exists")
-        # should i re-add the public key? (no, you are going to check manually.)
-        return
-    try:
-        os.remove(f"{HOME}/.ssh/ags-key")
-    except:
-        pass
-    try:
-        os.remove(f"{HOME}/.ssh/ags-key.pub")
-    except:
-        pass
-    print("Creating key pair")
-    os.system(
-        f'cd {HOME}/.ssh && ssh-keygen -o -t ed25519 -C "ags" -f "ags-key" -N "''"')
-    print("Coping public key into the ssh server")
-    with open(f"{HOME}/.ssh/ags-key.pub", encoding="utf-8") as f:
-        pub_key = f.read()
-        run_command_in_termux("cd /data/data/com.termux/files/home/")
-        pub_key = pub_key.replace('\n', '').replace('\r', '')
-        run_command_in_termux(
-            f'echo {pub_key} \\>\\> .ssh/authorized_keys')
-    print("Checking ssh configuration")
-    with open(f"{HOME}/.ssh/config", "a+", encoding="utf-8") as f:
-        f.seek(0)
-        config = f.read()
-        line = re.findall('\\s(ags)\\s', config)
-        if not line:
-            f.writelines(
-                ["\n\nHost localhost", "\n  HostName localhost", "\n  User ags", f"\n  IdentityFile {HOME}/.ssh/ags-key"])
-
-
 def setup_system():
     open_termux(2)
     print("Updating")
     run_command_in_termux("apt update \\&\\& apt -y upgrade")
     print("Installing git and openssh")
     run_command_in_termux("apt install git openssh")
-    run_command_in_termux("sshd")
-    create_ssh_key_pair()
 
 
 def find_device_arp_info():
@@ -177,26 +128,29 @@ def delete_repo():
 
 
 def check_everything():
-    # python version
+    logg().info("check python version")
     if sys.version_info[0] < 3:
         print_exception("Python 3 or a more recent version is required.")
-    # adb installed?
-    # or is ssh installed?
+    logg().info("check adb, ssh, ssh-keygen installed")
     _platform = platform.system()
     if _platform == "Windows":
         if not is_installed("adb.exe"):
             print_exception("Install adb first.")
-        if not is_installed("ssh.exe"):
+        if not is_installed("ssh.exe -v"):
             print_exception("Install ssh first.")
     elif _platform == "Linux" or _platform == "Darwin":
         if not is_installed("adb"):
             print_exception("Install adb first.")
-        if not is_installed("ssh"):
+        if not is_installed("ssh -v"):
             print_exception("Install ssh first.")
-    # device connected?
+    logg().info("check if device is connected")
     if _platform == "Windows":
         if not w_adb.is_device_available("adb.exe"):
             print_exception("None device connected")
-    # check ags-keys
-    if not w_ssh.are_keys_presence("ags-keys"):
-        logg().warning("You should setup the system (Option 1).")
+    logg().info("check ags-keys")
+    if not w_ssh.are_keys_present("ags-key"):
+        w_ssh.create_ssh_key_pair()
+    else:
+        logg().info("ags-keys already present")
+    w_ssh.create_ssh_configuration()  # auto check for configuration presence
+    # logg().warning("You should setup the system (Option 1).")

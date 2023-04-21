@@ -2,5 +2,7 @@ import subprocess
 
 
 def is_installed(program):
-    result = subprocess.run(program, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="UTF-8", check=False)
+    command = program.split(' ')
+    result = subprocess.run(command, shell=True, stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL, encoding="UTF-8", check=False)
     return result is not None
