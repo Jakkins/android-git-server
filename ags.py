@@ -1,7 +1,6 @@
 import os
 import platform
 import sys
-import time
 from src.core import check_everything, create_new_repository, delete_repo, find_device_arp_info, get_clone_command, list_all_active_repos
 from src.termux.termux_manager import setup_system
 
@@ -10,7 +9,7 @@ ADB_COMMAND = "adb.exe" if _platform == "Windows" else "adb"
 
 def print_menu():
     os.system('cls' if os.name == 'nt' else 'clear')
-    time.sleep(1.5)
+    # time.sleep(1)
     print("  __    ___  ____ ")
     print(" / _\\  / __)/ ___)")
     print("/    \\| (_  \\ ___\\")

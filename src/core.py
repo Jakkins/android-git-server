@@ -132,7 +132,7 @@ def check_everything():
     if not adb.is_device_available(ADB_COMMAND):
         print_exception("None device connected")
     logg().info("check ags-keys")
-    if not ssh.are_keys_present("ags-key"):
+    if not ssh.are_keys_present():
         ssh.create_ssh_key_pair()
     else:
         logg().info("ags-keys already present")
