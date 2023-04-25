@@ -111,8 +111,8 @@ def delete_repo():
                 _yn = input(
                     f'You sure you want to delete {repos_dict[_choice]}? [type name of repo] ')
                 if _yn == repos_dict[_choice]:
-                    path_to_remove = os.path.join(AGS_PATH, "repos", _yn)
-                    command_string = f"rm -r {path_to_remove}"
+                    # right/path/is/like/this
+                    command_string = f"rm -r {AGS_PATH}/repos/{_yn}"
                     ssh.run_command_with_ssh(command_string)
         except:
             pass
