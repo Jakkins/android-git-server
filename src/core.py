@@ -6,14 +6,17 @@ import subprocess
 import platform
 import re
 import sys
+import time
 from src.termux.termux_utils import open_termux, run_command_in_termux
 from src.common.utils import is_installed
 from src.logg import logg, print_exception
-import src.windows_utils.adb as w_adb
-import src.windows_utils.ssh as w_ssh
+import src.common.adb as adb
+import src.common.ssh as ssh
 
 _platform = platform.system()
 ADB_COMMAND = "adb.exe" if _platform == "Windows" else "adb"
+SSH_V_COMMAND = "ssh.exe -v" if _platform == "Windows" else "ssh -v"
+SSH_COMMAND = "ssh.exe" if _platform == "Windows" else "ssh"
 AGS_PATH = "/data/data/com.termux/files/home/android-git-server-utils"
 HOME = os.path.expanduser("~")
 
@@ -45,6 +48,7 @@ def create_new_repository():
     print("     git clone ssh://git@mydomain:[port]/projectname.git")
     print(
         f"     git clone ssh://localhost:8022/data/data/com.termux/files/home/android-git-server-utils/repos/{repo_name}")
+    input('click any key to continue')
 
 
 def find_device_arp_info():
@@ -55,22 +59,22 @@ def find_device_arp_info():
             print(socket.gethostbyaddr(line[0]))
         except:
             pass
+    input('click any key to continue')
 
 
 def get_all_active_repo():
-    cmd_literal = f"ssh -i {HOME}\\.ssh\\ags-key -p 8022 localhost ls ./android-git-server-utils/repos"
-    result = subprocess.run(cmd_literal.split(
-        " "), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="UTF-8", check=False)
-    if result.returncode != 0:
-        print("STDERR:", result.stderr)
-        return ""
-    return result.stdout
+    command_string = "ls ./android-git-server-utils/repos"
+    result = ssh.run_command_with_ssh(command_string)
+    if result == "":
+        return "None active repo found"
+    return result
 
 
 def list_all_active_repos():
     repos = get_all_active_repo()
     if repos:
         print(repos)
+    input('click any key to continue')
 
 
 def print_repo_menu() -> (dict[int, str] | None):
@@ -91,10 +95,11 @@ def get_clone_command():
     repos_dict = print_repo_menu()
     if repos_dict:
         try:
-            _choice = int(input('Choose a repository: '))
+            _choice = int(input('choose a repository: '))
             if _choice <= len(repos_dict):
                 print(
                     f"git clone ssh://localhost:8022/data/data/com.termux/files/home/android-git-server-utils/repos/{repos_dict[_choice]}")
+                input('click any key to continue')
         except:
             pass
 
@@ -103,15 +108,17 @@ def delete_repo():
     repos_dict = print_repo_menu()
     if repos_dict:
         try:
-            _choice = int(input('Choose a repository: '))
+            _choice = int(input('choose a repository: '))
             if _choice <= len(repos_dict):
                 _yn = input(
                     f'You sure you want to delete {repos_dict[_choice]}? [type name of repo] ')
                 if _yn == repos_dict[_choice]:
-                    open_termux(ADB_COMMAND, 1)
-                    run_command_in_termux(f"rm -r {AGS_PATH}/repos/{_yn}")
+                    path_to_remove = os.path.join(AGS_PATH, "repos", _yn)
+                    command_string = f"rm -r {path_to_remove}"
+                    ssh.run_command_with_ssh(command_string)
         except:
             pass
+    input('click any key to continue')
 
 
 def check_everything():
@@ -119,20 +126,17 @@ def check_everything():
     if sys.version_info[0] < 3:
         print_exception("Python 3 or a more recent version is required.")
     logg().info("check adb, ssh installed")
-    ssh_command = "ssh.exe -v" if _platform == "Windows" else "ssh -v"
     if not is_installed(ADB_COMMAND):
         print_exception("Install adb first.")
-    if not is_installed(ssh_command):
+    if not is_installed(SSH_V_COMMAND):
         print_exception("Install ssh first.")
-    if _platform == "Windows":
-        logg().info("check if device is connected")
-        if not w_adb.is_device_available(ADB_COMMAND):
-            print_exception("None device connected")
-        logg().info("check ags-keys")
-        if not w_ssh.are_keys_present("ags-key"):
-            w_ssh.create_ssh_key_pair()
-        else:
-            logg().info("ags-keys already present")
-        w_ssh.create_ssh_configuration()  # auto check for configuration presence
-        # logg().warning("You should setup the system (Option 1).")
+    logg().info("check if device is connected")
+    if not adb.is_device_available(ADB_COMMAND):
+        print_exception("None device connected")
+    logg().info("check ags-keys")
+    if not ssh.are_keys_present("ags-key"):
+        ssh.create_ssh_key_pair()
+    else:
+        logg().info("ags-keys already present")
+    ssh.create_ssh_configuration()  # auto check for configuration presence
     os.system('adb forward tcp:8022 tcp:8022')

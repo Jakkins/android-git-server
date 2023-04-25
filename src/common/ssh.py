@@ -1,10 +1,14 @@
 import os
+import platform
 import re
+import subprocess
 from src.common.utils import read_file_content
 from src.logg import logg, print_exception
 from src.termux.termux_utils import run_command_in_termux
 
 HOME = os.path.expanduser("~")
+_platform = platform.system()
+SSH_COMMAND = "ssh.exe" if _platform == "Windows" else "ssh"
 
 
 def are_keys_present(key_name):
@@ -63,9 +67,22 @@ def export_pub_key_in_termux_sshd():
     run_command_in_termux("mkdir -p /data/data/com.termux/files/home/.ssh/")
     run_command_in_termux("bash")
     pubk_key_str = pubk.split(" ")[1]
-    run_command_in_termux(f'result=\\$\\(grep -e {pubk_key_str} /data/data/com.termux/files/home/.ssh/authorized_keys\\)\\;')
+    run_command_in_termux(f'result=\\$\\(grep -oe {pubk_key_str} /data/data/com.termux/files/home/.ssh/authorized_keys\\)\\;')
     command = f"""
-    if \\[ -z '$result' \\]\\; then echo {pubk} \\>\\> /data/data/com.termux/files/home/.ssh/authorized_keys\\; else echo key already added\\; fi
+    if \\[ -z '\\$result' \\]\\; then echo {pubk} \\>\\> /data/data/com.termux/files/home/.ssh/authorized_keys\\; else echo key already added\\; fi
 	""".strip().replace("\n", "")
     run_command_in_termux(command)
     run_command_in_termux("cat /data/data/com.termux/files/home/.ssh/authorized_keys")
+
+def run_command_with_ssh(command_string: str):
+    privk = os.path.join(HOME, ".ssh", "ags-key")
+    command = f"{SSH_COMMAND} -i {privk} -p 8022 localhost {command_string}"
+    shell = True if platform.system() == "Windows" else False
+    result = subprocess.run(command.split(
+        " "), shell=shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="UTF-8", check=False)
+    if result.returncode != 0:
+        logg().error(result.stderr)
+        logg().warning("try to run this command to see why it's failing: ")
+        logg().warning(f"{command}")
+        return ""
+    return result.stdout
