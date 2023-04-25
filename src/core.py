@@ -2,16 +2,14 @@ import codecs
 import os
 import os.path
 import socket
-import subprocess
 import platform
 import re
 import sys
-import time
-from src.termux.termux_utils import open_termux, run_command_in_termux
+from src.termux.termux_utils import run_command_in_termux
 from src.common.utils import is_installed
 from src.logg import logg, print_exception
-import src.common.adb as adb
-import src.common.ssh as ssh
+from src.common import adb
+from src.common import ssh
 
 _platform = platform.system()
 ADB_COMMAND = "adb.exe" if _platform == "Windows" else "adb"
