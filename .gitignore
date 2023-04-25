@@ -1,3 +1,6 @@
 ags-key
 ags-key.pub
 __pycache__
+dist
+build
+ags.spec
