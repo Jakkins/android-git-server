@@ -138,3 +138,41 @@ def check_everything():
         logg().info("ags-keys already present")
     ssh.create_ssh_configuration()  # auto check for configuration presence
     os.system('adb forward tcp:8022 tcp:8022')
+
+
+def get_dir_path():
+    while True:
+        dir_path = input("Enter a directory path: ")
+        if os.path.isdir(dir_path):
+            return dir_path
+        logg().warning("Directory does not exist. Please try again.")
+
+
+def clone_a_repo():
+    dir_path = get_dir_path()
+    repos_dict = print_repo_menu()
+    if repos_dict:
+        _username = ""
+        _email = ""
+        try:
+            _choice = int(input('choose a repository: '))
+            if _choice <= len(repos_dict):
+                clone_command = f"git clone ssh://localhost:8022/data/data/com.termux/files/home/android-git-server-utils/repos/{repos_dict[_choice]}"
+                _username = input(
+                    'insert username (default: none): ') or "none"
+                _email = input('insert email (default: none): ') or "none"
+                os.chdir(dir_path)
+                os.system(clone_command)
+                repo_name = repos_dict[_choice]
+                if not repo_name.endswith('.git'):
+                    repo_name = repo_name.replace(".git", "")
+                os.chdir(os.path.join(dir_path, repo_name))
+                os.system('git config user.name "' + _username + '"')
+                os.system('git config user.email "' + _email + '"')
+                input('click any key to continue')
+        except:
+            logg().error("exception occurred")
+            logg().info("remember to:")
+            print('git config user.name %s', _username)
+            print('git config user.email %s', _email)
+            input('click any key to continue')
