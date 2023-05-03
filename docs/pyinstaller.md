@@ -11,5 +11,11 @@ if problem:
 3. Go to C:\Users\user\AppData\Local and delete `IconCache.db`
 
 ```bash
+pip install --upgrade pip
+pip install pyinstaller
 pyinstaller.exe --onefile -i='.\ags.ico' ags.py
+```
+
+```bash
+C:\Users\username\AppData\Local\Programs\Python\Python311\python.exe -m pip install --upgrade pip
 ```

@@ -1,4 +1,4 @@
-# ssh connection refused if not in lan
+# kex_exchange_identification: Connection closed by remote host
 
 > connection is always towards the localhost
 
@@ -8,6 +8,6 @@ adb forward --list
 # aabb1122 tcp:8022 tcp:8022
 nmap.exe localhost
 # 8022/tcp  open  oa-system
-ssh.exe -vvv -i C:\Users\samuele.plescia\.ssh\ags-key -p 8022 localhost
+ssh.exe -vvv -i C:\Users\username\.ssh\ags-key -p 8022 localhost
 # ssh: connect to host aabb1122 port 8022: Connection refused
 ```
