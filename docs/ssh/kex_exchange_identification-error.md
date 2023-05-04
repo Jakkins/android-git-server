@@ -1,5 +1,7 @@
 # kex_exchange_identification: Connection closed by remote host
 
+https://superuser.com/questions/1782355/termux-ssh-connection-over-usb-c-result-in-connection-closed-by-remote-host
+
 > connection is always towards the localhost
 
 ```bash
