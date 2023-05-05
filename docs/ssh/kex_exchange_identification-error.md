@@ -13,3 +13,7 @@ nmap.exe localhost
 ssh.exe -vvv -i C:\Users\username\.ssh\ags-key -p 8022 localhost
 # ssh: connect to host aabb1122 port 8022: Connection refused
 ```
+
+```bash
+sshd -ddd
+```
