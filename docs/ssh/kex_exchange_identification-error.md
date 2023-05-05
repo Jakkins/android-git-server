@@ -17,3 +17,10 @@ ssh.exe -vvv -i C:\Users\username\.ssh\ags-key -p 8022 localhost
 ```bash
 sshd -ddd
 ```
+
+# not a solution but still usable
+
+The thing is:
+
+- when you can't connect to internet you can usb tethering with the smartphone
+- when you can connect to internet, just connect also the smartphone to the LAN
