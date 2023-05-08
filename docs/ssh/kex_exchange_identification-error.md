@@ -24,3 +24,4 @@ The thing is:
 
 - when you can't connect to internet you can usb tethering with the smartphone
 - when you can connect to internet, just connect also the smartphone to the LAN
+- you can do wifi hotspot with another cell and connect to it to bypass this problem
