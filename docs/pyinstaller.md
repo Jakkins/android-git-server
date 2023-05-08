@@ -19,3 +19,18 @@ pyinstaller.exe --onefile -i='.\ags.ico' ags.py
 ```bash
 C:\Users\username\AppData\Local\Programs\Python\Python311\python.exe -m pip install --upgrade pip
 ```
+
+# linux
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install pyinstaller
+python -m PyInstaller ags.py 
+```
+
+## installation
+
+```bash
+mv dist/ags /usr/local/programs/
+ln -s /usr/local/programs/ags/ags /usr/local/bin/ags
+```
